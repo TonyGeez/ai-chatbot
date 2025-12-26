@@ -43,13 +43,11 @@ import {
 } from "./elements/prompt-input";
 import { ArrowUpIcon, PaperclipIcon, StopIcon } from "./icons";
 import { PreviewAttachment } from "./preview-attachment";
-import { SuggestedActions } from "./suggested-actions";
 import { Button } from "./ui/button";
 import type { VisibilityType } from "./visibility-selector";
 
 function setCookie(name: string, value: string) {
-  const maxAge = 60 * 60 * 24 * 365; // 1 year
-  // biome-ignore lint/suspicious/noDocumentCookie: needed for client-side cookie setting
+  const maxAge = 60 * 60 * 24 * 365;
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}`;
 }
 
@@ -124,13 +122,10 @@ function PureMultimodalInput({
   useEffect(() => {
     if (textareaRef.current) {
       const domValue = textareaRef.current.value;
-      // Prefer DOM value over localStorage to handle hydration
       const finalValue = domValue || localStorageInput || "";
       setInput(finalValue);
       adjustHeight();
     }
-    // Only run once after hydration
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adjustHeight, localStorageInput, setInput]);
 
   useEffect(() => {
@@ -196,12 +191,7 @@ function PureMultimodalInput({
       if (response.ok) {
         const data = await response.json();
         const { url, pathname, contentType } = data;
-
-        return {
-          url,
-          name: pathname,
-          contentType,
-        };
+        return { url, name: pathname, contentType };
       }
       const { error } = await response.json();
       toast.error(error);
@@ -213,7 +203,6 @@ function PureMultimodalInput({
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(event.target.files || []);
-
       setUploadQueue(files.map((file) => file.name));
 
       try {
@@ -239,19 +228,13 @@ function PureMultimodalInput({
   const handlePaste = useCallback(
     async (event: ClipboardEvent) => {
       const items = event.clipboardData?.items;
-      if (!items) {
-        return;
-      }
+      if (!items) return;
 
       const imageItems = Array.from(items).filter((item) =>
         item.type.startsWith("image/")
       );
 
-      if (imageItems.length === 0) {
-        return;
-      }
-
-      // Prevent default paste behavior for images
+      if (imageItems.length === 0) return;
       event.preventDefault();
 
       setUploadQueue((prev) => [...prev, "Pasted image"]);
@@ -284,12 +267,9 @@ function PureMultimodalInput({
     [setAttachments, uploadFile]
   );
 
-  // Add paste event listener to textarea
   useEffect(() => {
     const textarea = textareaRef.current;
-    if (!textarea) {
-      return;
-    }
+    if (!textarea) return;
 
     textarea.addEventListener("paste", handlePaste);
     return () => textarea.removeEventListener("paste", handlePaste);
@@ -297,16 +277,6 @@ function PureMultimodalInput({
 
   return (
     <div className={cn("relative flex w-full flex-col gap-4", className)}>
-      {messages.length === 0 &&
-        attachments.length === 0 &&
-        uploadQueue.length === 0 && (
-          <SuggestedActions
-            chatId={chatId}
-            selectedVisibilityType={selectedVisibilityType}
-            sendMessage={sendMessage}
-          />
-        )}
-
       <input
         className="-top-4 -left-4 pointer-events-none fixed size-0.5 opacity-0"
         multiple
@@ -317,7 +287,7 @@ function PureMultimodalInput({
       />
 
       <PromptInput
-        className="rounded-xl border border-border bg-background p-3 shadow-xs transition-all duration-200 focus-within:border-border hover:border-muted-foreground/50"
+        className="rounded-xl border border-border bg-background p-3 shadow-sm transition-all duration-200 focus-within:border-muted-foreground/50"
         onSubmit={(event) => {
           event.preventDefault();
           if (status !== "ready") {
@@ -349,11 +319,7 @@ function PureMultimodalInput({
 
             {uploadQueue.map((filename) => (
               <PreviewAttachment
-                attachment={{
-                  url: "",
-                  name: filename,
-                  contentType: "",
-                }}
+                attachment={{ url: "", name: filename, contentType: "" }}
                 isUploading={true}
                 key={filename}
               />
@@ -362,7 +328,7 @@ function PureMultimodalInput({
         )}
         <div className="flex flex-row items-start gap-1 sm:gap-2">
           <PromptInputTextarea
-            className="grow resize-none border-0! border-none! bg-transparent p-2 text-base outline-none ring-0 [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:hidden"
+            className="grow resize-none border-0! border-none! bg-transparent p-2 text-base outline-none ring-0 placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0"
             data-testid="multimodal-input"
             disableAutoResize={true}
             maxHeight={200}
@@ -374,8 +340,8 @@ function PureMultimodalInput({
             value={input}
           />
         </div>
-        <PromptInputToolbar className="border-top-0! border-t-0! p-0 shadow-none dark:border-0 dark:border-transparent!">
-          <PromptInputTools className="gap-0 sm:gap-0.5">
+        <PromptInputToolbar className="border-t-0! p-0 shadow-none">
+          <PromptInputTools className="gap-0.5">
             <AttachmentsButton
               fileInputRef={fileInputRef}
               selectedModelId={selectedModelId}
@@ -391,7 +357,7 @@ function PureMultimodalInput({
             <StopButton setMessages={setMessages} stop={stop} />
           ) : (
             <PromptInputSubmit
-              className="size-8 rounded-full bg-primary text-primary-foreground transition-colors duration-200 hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
+              className="size-7 rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
               data-testid="send-button"
               disabled={!input.trim() || uploadQueue.length > 0}
               status={status}
@@ -408,22 +374,12 @@ function PureMultimodalInput({
 export const MultimodalInput = memo(
   PureMultimodalInput,
   (prevProps, nextProps) => {
-    if (prevProps.input !== nextProps.input) {
+    if (prevProps.input !== nextProps.input) return false;
+    if (prevProps.status !== nextProps.status) return false;
+    if (!equal(prevProps.attachments, nextProps.attachments)) return false;
+    if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType)
       return false;
-    }
-    if (prevProps.status !== nextProps.status) {
-      return false;
-    }
-    if (!equal(prevProps.attachments, nextProps.attachments)) {
-      return false;
-    }
-    if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType) {
-      return false;
-    }
-    if (prevProps.selectedModelId !== nextProps.selectedModelId) {
-      return false;
-    }
-
+    if (prevProps.selectedModelId !== nextProps.selectedModelId) return false;
     return true;
   }
 );
@@ -442,7 +398,7 @@ function PureAttachmentsButton({
 
   return (
     <Button
-      className="aspect-square h-8 rounded-lg p-1 transition-colors hover:bg-accent"
+      className="aspect-square h-7 rounded-lg p-1 transition-colors hover:bg-accent"
       data-testid="attachments-button"
       disabled={status !== "ready" || isReasoningModel}
       onClick={(event) => {
@@ -451,7 +407,7 @@ function PureAttachmentsButton({
       }}
       variant="ghost"
     >
-      <PaperclipIcon size={14} style={{ width: 14, height: 14 }} />
+      <PaperclipIcon size={14} />
     </Button>
   );
 }
@@ -473,7 +429,6 @@ function PureModelSelectorCompact({
     chatModels[0];
   const [provider] = selectedModel.id.split("/");
 
-  // Provider display names
   const providerNames: Record<string, string> = {
     anthropic: "Anthropic",
     openai: "OpenAI",
@@ -485,9 +440,14 @@ function PureModelSelectorCompact({
   return (
     <ModelSelector onOpenChange={setOpen} open={open}>
       <ModelSelectorTrigger asChild>
-        <Button className="h-8 w-[200px] justify-between px-2" variant="ghost">
+        <Button
+          className="h-7 w-[180px] justify-between px-2 text-xs"
+          variant="ghost"
+        >
           {provider && <ModelSelectorLogo provider={provider} />}
-          <ModelSelectorName>{selectedModel.name}</ModelSelectorName>
+          <ModelSelectorName className="text-xs">
+            {selectedModel.name}
+          </ModelSelectorName>
         </Button>
       </ModelSelectorTrigger>
       <ModelSelectorContent>
@@ -539,7 +499,7 @@ function PureStopButton({
 }) {
   return (
     <Button
-      className="size-7 rounded-full bg-foreground p-1 text-background transition-colors duration-200 hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground"
+      className="size-7 rounded-full bg-foreground p-1 text-background transition-colors hover:bg-foreground/90"
       data-testid="stop-button"
       onClick={(event) => {
         event.preventDefault();

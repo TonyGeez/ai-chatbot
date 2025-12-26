@@ -1211,3 +1211,54 @@ export const WarningIcon = ({ size = 16 }: { size?: number }) => {
     </svg>
   );
 };
+
+export const Settings = ({ size = 16 }: { size?: number }) => (
+  <svg
+    height={size}
+    strokeLinejoin="round"
+    style={{ color: "currentcolor" }}
+    viewBox="0 0 16 16"
+    width={size}
+  >
+    <path
+      clipRule="evenodd"
+      d="M8 4.5V6H6V4.5C6 3.39543 6.89543 2.5 8 2.5C9.10457 2.5 10 3.39543 10 4.5ZM4.5 6V4.5C4.5 2.567 6.067 1 8 1C9.933 1 11.5 2.567 11.5 4.5V6H12.5H14V7.5V12.5C14 13.8807 12.8807 15 11.5 15H4.5C3.11929 15 2 13.8807 2 12.5V7.5V6H3.5H4.5ZM11.5 7.5H10H6H4.5H3.5V12.5C3.5 13.0523 3.94772 13.5 4.5 13.5H11.5C12.0523 13.5 12.5 13.0523 12.5 12.5V7.5H11.5Z"
+      fill="currentColor"
+      fillRule="evenodd"
+    />
+  </svg>
+);
+
+export const Menu = ({ size = 16 }: { size?: number }) => (
+  <svg
+    height={size}
+    strokeLinejoin="round"
+    style={{ color: "currentcolor" }}
+    viewBox="0 0 16 16"
+    width={size}
+  >
+    <path
+      clipRule="evenodd"
+      d="M1 2H1.75H14.25H15V3.5H14.25H1.75H1V2ZM1 12.5H1.75H14.25H15V14H14.25H1.75H1V12.5ZM1.75 7.25H1V8.75H1.75H14.25H15V7.25H14.25H1.75Z"
+      fill="currentColor"
+      fillRule="evenodd"
+    />
+  </svg>
+);
+
+export const Send = ({ size = 16 }: { size?: number }) => (
+  <svg
+    height={size}
+    strokeLinejoin="round"
+    style={{ color: "currentcolor" }}
+    viewBox="0 0 16 16"
+    width={size}
+  >
+    <path
+      clipRule="evenodd"
+      d="M8.75 1V1.75V8.68934L10.7197 6.71967L11.25 6.18934L12.3107 7.25L11.7803 7.78033L8.70711 10.8536C8.31658 11.2441 7.68342 11.2441 7.29289 10.8536L4.21967 7.78033L3.68934 7.25L4.75 6.18934L5.28033 6.71967L7.25 8.68934V1.75V1H8.75ZM13.5 9.25V13.5H2.5V9.25V8.5H1V9.25V14C1 14.5523 1.44771 15 2 15H14C14.5523 15 15 14.5523 15 14V9.25V8.5H13.5V9.25Z"
+      fill="currentColor"
+      fillRule="evenodd"
+    />
+  </svg>
+);

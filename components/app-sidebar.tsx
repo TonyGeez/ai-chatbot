@@ -13,6 +13,16 @@ import {
   SidebarHistory,
 } from "@/components/sidebar-history";
 import { SidebarUserNav } from "@/components/sidebar-user-nav";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -23,16 +33,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "./ui/alert-dialog";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
@@ -41,9 +45,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
 
   const handleDeleteAll = () => {
-    const deletePromise = fetch("/api/history", {
-      method: "DELETE",
-    });
+    const deletePromise = fetch("/api/history", { method: "DELETE" });
 
     toast.promise(deletePromise, {
       loading: "Deleting all chats...",
@@ -60,18 +62,16 @@ export function AppSidebar({ user }: { user: User | undefined }) {
 
   return (
     <>
-      <Sidebar className="group-data-[side=left]:border-r-0">
+      <Sidebar className="bg-sidebar group-data-[side=left]:border-r-0">
         <SidebarHeader>
           <SidebarMenu>
-            <div className="flex flex-row items-center justify-between">
+            <div className="flex flex-row items-center justify-between px-2 py-2">
               <Link
                 className="flex flex-row items-center gap-3"
                 href="/"
-                onClick={() => {
-                  setOpenMobile(false);
-                }}
+                onClick={() => setOpenMobile(false)}
               >
-                <span className="cursor-pointer rounded-md px-2 font-semibold text-lg hover:bg-muted">
+                <span className="cursor-pointer rounded-md px-2 font-semibold text-lg hover:bg-sidebar-accent">
                   Chatbot
                 </span>
               </Link>
@@ -80,7 +80,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        className="h-8 p-1 md:h-fit md:p-2"
+                        className="h-8 p-1.5 md:h-fit md:p-1.5"
                         onClick={() => setShowDeleteAllDialog(true)}
                         type="button"
                         variant="ghost"
@@ -96,7 +96,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      className="h-8 p-1 md:h-fit md:p-2"
+                      className="h-8 p-1.5 md:h-fit md:p-1.5"
                       onClick={() => {
                         setOpenMobile(false);
                         router.push("/");
@@ -119,7 +119,9 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         <SidebarContent>
           <SidebarHistory user={user} />
         </SidebarContent>
-        <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>
+        <SidebarFooter className="border-border border-t">
+          {user && <SidebarUserNav user={user} />}
+        </SidebarFooter>
       </Sidebar>
 
       <AlertDialog

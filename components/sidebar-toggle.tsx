@@ -1,5 +1,4 @@
 import type { ComponentProps } from "react";
-
 import { type SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import {
   Tooltip,
@@ -7,7 +6,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { SidebarLeftIcon } from "./icons";
+import { Menu } from "./icons";
 import { Button } from "./ui/button";
 
 export function SidebarToggle({
@@ -24,7 +23,7 @@ export function SidebarToggle({
           onClick={toggleSidebar}
           variant="outline"
         >
-          <SidebarLeftIcon size={16} />
+          <Menu size={14} />
         </Button>
       </TooltipTrigger>
       <TooltipContent align="start" className="hidden md:block">

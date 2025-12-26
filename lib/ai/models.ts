@@ -11,21 +11,21 @@ export type ChatModel = {
 export const chatModels: ChatModel[] = [
   // Anthropic
   {
-    id: "anthropic/claude-haiku-4.5",
-    name: "Claude Haiku 4.5",
-    provider: "anthropic",
+    id: "xiaomi/mimo-v2-flash:free",
+    name: "xiaomi/mimo-v2-flash:free",
+    provider: "openrouter",
     description: "Fast and affordable, great for everyday tasks",
   },
   {
-    id: "anthropic/claude-sonnet-4.5",
-    name: "Claude Sonnet 4.5",
-    provider: "anthropic",
+    id: "mistralai/devstral-2512:free",
+    name: "mistralai/devstral-2512:free",
+    provider: "openrouter",
     description: "Best balance of speed, intelligence, and cost",
   },
   {
-    id: "anthropic/claude-opus-4.5",
-    name: "Claude Opus 4.5",
-    provider: "anthropic",
+    id: "kwaipilot/kat-coder-pro:free",
+    name: "kwaipilot/kat-coder-pro:free",
+    provider: "openrouter",
     description: "Most capable Anthropic model",
   },
   // OpenAI
