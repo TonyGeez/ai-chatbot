@@ -41,7 +41,7 @@ import type { ProviderType } from "@/lib/providers";
 
 // biome-ignore lint: Forbidden non-null assertion.
 const client = postgres(process.env.POSTGRES_URL!);
-const db = drizzle(client);
+export const db = drizzle(client);
 
 export async function getUser(email: string): Promise<User[]> {
   try {
@@ -256,6 +256,12 @@ export async function getChatWithSettings({ id }: { id: string }) {
         model: chat.model,
         systemInstruction: chat.systemInstruction,
         temperature: chat.temperature,
+        maxTokens: chat.maxTokens,
+        topP: chat.topP,
+        topK: chat.topK,
+        presencePenalty: chat.presencePenalty,
+        frequencyPenalty: chat.frequencyPenalty,
+        seed: chat.seed,
       })
       .from(chat)
       .where(eq(chat.id, id));
@@ -660,4 +666,26 @@ export async function getAllProviderConfigs(userId: string) {
     .select()
     .from(providerConfig)
     .where(eq(providerConfig.userId, userId));
+}
+
+export async function getProviderApiKey(
+  userId: string,
+  provider: ProviderType
+): Promise<string | null> {
+  try {
+    const result = await db
+      .select({ apiKey: providerConfig.apiKey })
+      .from(providerConfig)
+      .where(
+        and(
+          eq(providerConfig.userId, userId),
+          eq(providerConfig.provider, provider)
+        )
+      )
+      .limit(1);
+
+    return result[0]?.apiKey ?? null;
+  } catch (_error) {
+    return null;
+  }
 }

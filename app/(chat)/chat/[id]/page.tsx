@@ -58,6 +58,12 @@ async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
     model: chat.model || undefined,
     systemInstruction: chat.systemInstruction || undefined,
     temperature: chat.temperature || undefined,
+    maxTokens: chat.maxTokens || undefined,
+    topP: chat.topP || undefined,
+    topK: chat.topK || undefined,
+    presencePenalty: chat.presencePenalty || undefined,
+    frequencyPenalty: chat.frequencyPenalty || undefined,
+    seed: chat.seed || undefined,
   };
 
   return (

@@ -6,14 +6,15 @@ import {
 } from "ai";
 import dotenv from "dotenv";
 import { isTestEnvironment } from "../constants";
+import { getProviderApiKey } from "../db/queries";
+import type { ProviderType } from "../providers";
 
 dotenv.config();
 
 const THINKING_SUFFIX_REGEX = /-thinking$/;
 
-const openrouter = createOpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+// Default API key from environment as fallback
+const DEFAULT_API_KEY = process.env.OPENROUTER_API_KEY;
 
 export const myProvider = isTestEnvironment
   ? (() => {
@@ -34,10 +35,29 @@ export const myProvider = isTestEnvironment
     })()
   : null;
 
-export function getLanguageModel(modelId: string) {
+function createOpenRouterClient(apiKey: string | null | undefined) {
+  const key = apiKey || DEFAULT_API_KEY;
+  if (!key) {
+    throw new Error(
+      "OpenRouter API key is missing. Please configure your API key in settings."
+    );
+  }
+  return createOpenRouter({
+    apiKey: key,
+  });
+}
+
+export async function getLanguageModel(
+  modelId: string,
+  userId: string,
+  provider: ProviderType = "openrouter"
+) {
   if (isTestEnvironment && myProvider) {
     return myProvider.languageModel(modelId);
   }
+
+  const apiKey = await getProviderApiKey(userId, provider);
+  const openrouter = createOpenRouterClient(apiKey);
 
   const isReasoningModel =
     modelId.includes("reasoning") || modelId.endsWith("-thinking");
@@ -54,16 +74,20 @@ export function getLanguageModel(modelId: string) {
   return openrouter.languageModel(modelId);
 }
 
-export function getTitleModel() {
+export async function getTitleModel(userId: string, provider: ProviderType = "openrouter") {
   if (isTestEnvironment && myProvider) {
     return myProvider.languageModel("title-model");
   }
-  return openrouter.languageModel("anthropic/claude-haiku-4.5");
+  const apiKey = await getProviderApiKey(userId, provider);
+  const openrouter = createOpenRouterClient(apiKey);
+  return openrouter.languageModel("xiaomi/mimo-v2-flash:free");
 }
 
-export function getArtifactModel() {
+export async function getArtifactModel(userId: string, provider: ProviderType = "openrouter") {
   if (isTestEnvironment && myProvider) {
     return myProvider.languageModel("artifact-model");
   }
-  return openrouter.languageModel("anthropic/claude-haiku-4.5");
+  const apiKey = await getProviderApiKey(userId, provider);
+  const openrouter = createOpenRouterClient(apiKey);
+  return openrouter.languageModel("xiaomi/mimo-v2-flash:free");
 }

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "../../../../(auth)/auth";
-import { db } from "@/lib/db";
+import { auth } from "@/app/(auth)/auth";
+import { db } from "@/lib/db/queries";
 import { chat } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export async function POST(
   request: NextRequest,
@@ -17,13 +17,23 @@ export async function POST(
 
     const { id } = await params;
     const body = await request.json();
-    const { model, systemInstruction, temperature } = body;
+    const {
+      model,
+      systemInstruction,
+      temperature,
+      maxTokens,
+      topP,
+      topK,
+      presencePenalty,
+      frequencyPenalty,
+      seed,
+    } = body;
 
     // Verify the chat belongs to the user
     const existingChat = await db
       .select()
       .from(chat)
-      .where(eq(chat.id, id) && eq(chat.userId, session.user.id))
+      .where(and(eq(chat.id, id), eq(chat.userId, session.user.id)))
       .limit(1);
 
     if (existingChat.length === 0) {
@@ -35,8 +45,14 @@ export async function POST(
       .update(chat)
       .set({
         model,
-        systemInstruction: systemInstruction || null,
-        temperature: temperature || null,
+        systemInstruction: systemInstruction?.trim() || null,
+        temperature: temperature?.trim() || null,
+        maxTokens: maxTokens?.trim() || null,
+        topP: topP?.trim() || null,
+        topK: topK?.trim() || null,
+        presencePenalty: presencePenalty?.trim() || null,
+        frequencyPenalty: frequencyPenalty?.trim() || null,
+        seed: seed?.trim() || null,
       })
       .where(eq(chat.id, id));
 
@@ -72,9 +88,15 @@ export async function GET(
         model: chat.model,
         systemInstruction: chat.systemInstruction,
         temperature: chat.temperature,
+        maxTokens: chat.maxTokens,
+        topP: chat.topP,
+        topK: chat.topK,
+        presencePenalty: chat.presencePenalty,
+        frequencyPenalty: chat.frequencyPenalty,
+        seed: chat.seed,
       })
       .from(chat)
-      .where(eq(chat.id, id) && eq(chat.userId, session.user.id))
+      .where(and(eq(chat.id, id), eq(chat.userId, session.user.id)))
       .limit(1);
 
     if (chats.length === 0) {

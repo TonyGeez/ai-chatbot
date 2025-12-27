@@ -34,6 +34,12 @@ export const chat = pgTable("Chat", {
   model: text("model"),
   systemInstruction: text("systemInstruction"),
   temperature: text("temperature"),
+  maxTokens: text("maxTokens"),
+  topP: text("topP"),
+  topK: text("topK"),
+  presencePenalty: text("presencePenalty"),
+  frequencyPenalty: text("frequencyPenalty"),
+  seed: text("seed"),
 });
 
 export type Chat = InferSelectModel<typeof chat>;

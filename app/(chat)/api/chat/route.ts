@@ -124,7 +124,7 @@ export async function POST(request: Request) {
       });
 
       // Start title generation in parallel (don't await)
-      titlePromise = generateTitleFromUserMessage({ message });
+      titlePromise = generateTitleFromUserMessage({ message, userId: session.user.id });
     }
 
     // Use all messages for tool approval, otherwise DB messages + new message
@@ -177,10 +177,16 @@ export async function POST(request: Request) {
           selectedChatModel.includes("thinking");
 
         const result = streamText({
-          model: getLanguageModel(effectiveModel),
+          model: await getLanguageModel(effectiveModel, session.user.id),
           system: chat?.systemInstruction || systemPrompt({ selectedChatModel: effectiveModel, requestHints }),
           messages: await convertToModelMessages(uiMessages),
           temperature: chat?.temperature ? parseFloat(chat.temperature) : undefined,
+          maxTokens: chat?.maxTokens ? parseInt(chat.maxTokens) : undefined,
+          topP: chat?.topP ? parseFloat(chat.topP) : undefined,
+          topK: chat?.topK ? parseInt(chat.topK) : undefined,
+          presencePenalty: chat?.presencePenalty ? parseFloat(chat.presencePenalty) : undefined,
+          frequencyPenalty: chat?.frequencyPenalty ? parseFloat(chat.frequencyPenalty) : undefined,
+          seed: chat?.seed ? parseInt(chat.seed) : undefined,
           stopWhen: stepCountIs(5),
           experimental_activeTools: isReasoningModel
             ? []

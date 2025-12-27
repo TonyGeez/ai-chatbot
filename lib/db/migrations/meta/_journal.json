@@ -8,6 +8,13 @@
       "when": 1766808778714,
       "tag": "0000_cute_riptide",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1766815456587,
+      "tag": "0001_spicy_manta",
+      "breakpoints": true
     }
   ]
 }

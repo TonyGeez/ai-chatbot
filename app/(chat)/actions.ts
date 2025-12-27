@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { titlePrompt } from "@/lib/ai/prompts";
 import { getTitleModel } from "@/lib/ai/providers";
+import type { ProviderType } from "@/lib/providers";
 import {
   deleteMessagesByChatIdAfterTimestamp,
   getMessageById,
@@ -19,11 +20,15 @@ export async function saveChatModelAsCookie(model: string) {
 
 export async function generateTitleFromUserMessage({
   message,
+  userId,
+  provider = "openrouter",
 }: {
   message: UIMessage;
+  userId: string;
+  provider?: ProviderType;
 }) {
   const { text: title } = await generateText({
-    model: getTitleModel(),
+    model: await getTitleModel(userId, provider),
     system: titlePrompt,
     prompt: getTextFromMessage(message),
   });

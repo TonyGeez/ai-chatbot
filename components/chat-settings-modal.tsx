@@ -28,6 +28,12 @@ export interface ChatSettings {
   model: string;
   systemInstruction: string;
   temperature: string;
+  maxTokens?: string;
+  topP?: string;
+  topK?: string;
+  presencePenalty?: string;
+  frequencyPenalty?: string;
+  seed?: string;
 }
 
 interface ChatSettingsModalProps {
@@ -50,6 +56,12 @@ export function ChatSettingsModal({
   const [temperature, setTemperature] = useState<string>(
     currentSettings?.temperature || "0.7"
   );
+  const [maxTokens, setMaxTokens] = useState<string>(currentSettings?.maxTokens || "");
+  const [topP, setTopP] = useState<string>(currentSettings?.topP || "");
+  const [topK, setTopK] = useState<string>(currentSettings?.topK || "");
+  const [presencePenalty, setPresencePenalty] = useState<string>(currentSettings?.presencePenalty || "");
+  const [frequencyPenalty, setFrequencyPenalty] = useState<string>(currentSettings?.frequencyPenalty || "");
+  const [seed, setSeed] = useState<string>(currentSettings?.seed || "");
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -57,30 +69,49 @@ export function ChatSettingsModal({
       setModel(currentSettings.model || chatModels[0].id);
       setSystemInstruction(currentSettings.systemInstruction || "");
       setTemperature(currentSettings.temperature || "0.7");
+      setMaxTokens(currentSettings.maxTokens || "");
+      setTopP(currentSettings.topP || "");
+      setTopK(currentSettings.topK || "");
+      setPresencePenalty(currentSettings.presencePenalty || "");
+      setFrequencyPenalty(currentSettings.frequencyPenalty || "");
+      setSeed(currentSettings.seed || "");
     }
   }, [open, currentSettings]);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      const payload = {
+        model,
+        systemInstruction,
+        temperature,
+        maxTokens: maxTokens || null,
+        topP: topP || null,
+        topK: topK || null,
+        presencePenalty: presencePenalty || null,
+        frequencyPenalty: frequencyPenalty || null,
+        seed: seed || null,
+      };
+      console.log("Sending settings payload:", payload);
+
       const response = await fetch(`/api/chat/${chatId}/settings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          model,
-          systemInstruction,
-          temperature,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save settings");
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        console.error("Server error:", errorData);
+        throw new Error(`Failed to save settings: ${errorData.error}`);
       }
 
       toast.success("Chat settings saved successfully");
       onOpenChange(false);
+      // Refresh to reload settings from database
+      window.location.reload();
     } catch (error) {
       console.error("Error saving chat settings:", error);
       toast.error("Failed to save chat settings");
@@ -159,6 +190,96 @@ export function ChatSettingsModal({
             </Select>
             <p className="text-xs text-muted-foreground">
               Controls randomness: Lower is more focused, higher is more creative
+            </p>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="max-tokens">Max Tokens</Label>
+            <Input
+              id="max-tokens"
+              type="number"
+              placeholder="Optional - max tokens to generate"
+              value={maxTokens}
+              onChange={(e) => setMaxTokens(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Maximum number of tokens to generate (optional)
+            </p>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="top-p">Top P</Label>
+            <Input
+              id="top-p"
+              type="number"
+              step="0.01"
+              min="0"
+              max="1"
+              placeholder="0.0 - 1.0 (optional)"
+              value={topP}
+              onChange={(e) => setTopP(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Nucleus sampling: 0.1 = only top 10% probability mass (optional)
+            </p>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="top-k">Top K</Label>
+            <Input
+              id="top-k"
+              type="number"
+              min="1"
+              placeholder="Optional"
+              value={topK}
+              onChange={(e) => setTopK(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Only sample from top K options (removes low probability responses)
+            </p>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="presence-penalty">Presence Penalty</Label>
+            <Input
+              id="presence-penalty"
+              type="number"
+              step="0.1"
+              placeholder="-2.0 to 2.0 (optional)"
+              value={presencePenalty}
+              onChange={(e) => setPresencePenalty(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Positive values penalize new tokens based on whether they appear in the text so far
+            </p>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="frequency-penalty">Frequency Penalty</Label>
+            <Input
+              id="frequency-penalty"
+              type="number"
+              step="0.1"
+              placeholder="-2.0 to 2.0 (optional)"
+              value={frequencyPenalty}
+              onChange={(e) => setFrequencyPenalty(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Positive values penalize new tokens based on their frequency in the text so far
+            </p>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="seed">Seed</Label>
+            <Input
+              id="seed"
+              type="number"
+              placeholder="Optional - for deterministic results"
+              value={seed}
+              onChange={(e) => setSeed(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Set a seed for reproducible/deterministic results
             </p>
           </div>
         </div>
