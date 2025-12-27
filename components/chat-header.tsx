@@ -2,26 +2,31 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { memo } from "react";
+import { memo, useState } from "react";
 import { useWindowSize } from "usehooks-ts";
 import { SidebarToggle } from "@/components/sidebar-toggle";
 import { Button } from "@/components/ui/button";
-import { PlusIcon } from "./icons";
+import { PlusIcon, SettingsIcon } from "./icons";
 import { useSidebar } from "./ui/sidebar";
 import { VisibilitySelector, type VisibilityType } from "./visibility-selector";
+import { ChatSettingsModal } from "./chat-settings-modal";
+import type { ChatSettings } from "./chat-settings-modal";
 
 function PureChatHeader({
   chatId,
   selectedVisibilityType,
   isReadonly,
+  initialSettings,
 }: {
   chatId: string;
   selectedVisibilityType: VisibilityType;
   isReadonly: boolean;
+  initialSettings?: Partial<ChatSettings>;
 }) {
   const router = useRouter();
   const { open } = useSidebar();
   const { width: windowWidth } = useWindowSize();
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   return (
     <header className="sticky top-0 flex items-center gap-2 border-border border-b bg-background px-2 py-1.5 md:px-2">
@@ -49,18 +54,24 @@ function PureChatHeader({
         />
       )}
 
-      <Button
-        asChild
-        className="order-3 hidden bg-primary px-2 text-primary-foreground hover:bg-primary/90 md:ml-auto md:flex md:h-fit"
-      >
-        <Link
-          href={"https://vercel.com/templates/next.js/nextjs-ai-chatbot"}
-          rel="noreferrer"
-          target="_noblank"
+      {!isReadonly && (
+        <Button
+          variant="outline"
+          size="icon"
+          className="order-3 h-8 w-8 md:ml-auto"
+          onClick={() => setShowSettingsModal(true)}
+          title="Chat Settings"
         >
-          Settings
-        </Link>
-      </Button>
+          <SettingsIcon />
+        </Button>
+      )}
+
+      <ChatSettingsModal
+        chatId={chatId}
+        open={showSettingsModal}
+        onOpenChange={setShowSettingsModal}
+        currentSettings={initialSettings}
+      />
     </header>
   );
 }
@@ -69,6 +80,11 @@ export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
   return (
     prevProps.chatId === nextProps.chatId &&
     prevProps.selectedVisibilityType === nextProps.selectedVisibilityType &&
-    prevProps.isReadonly === nextProps.isReadonly
+    prevProps.isReadonly === nextProps.isReadonly &&
+    prevProps.initialSettings?.model === nextProps.initialSettings?.model &&
+    prevProps.initialSettings?.systemInstruction ===
+      nextProps.initialSettings?.systemInstruction &&
+    prevProps.initialSettings?.temperature ===
+      nextProps.initialSettings?.temperature
   );
 });

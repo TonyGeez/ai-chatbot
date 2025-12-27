@@ -6,8 +6,9 @@ import { auth } from "@/app/(auth)/auth";
 import { Chat } from "@/components/chat";
 import { DataStreamHandler } from "@/components/data-stream-handler";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
-import { getChatById, getMessagesByChatId } from "@/lib/db/queries";
+import { getChatById, getChatWithSettings, getMessagesByChatId } from "@/lib/db/queries";
 import { convertToUIMessages } from "@/lib/utils";
+import type { ChatSettings } from "@/components/chat-settings-modal";
 
 export default function Page(props: { params: Promise<{ id: string }> }) {
   return (
@@ -19,7 +20,7 @@ export default function Page(props: { params: Promise<{ id: string }> }) {
 
 async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const chat = await getChatById({ id });
+  const chat = await getChatWithSettings({ id });
 
   if (!chat) {
     redirect("/");
@@ -50,31 +51,25 @@ async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get("chat-model");
 
-  if (!chatModelFromCookie) {
-    return (
-      <>
-        <Chat
-          autoResume={true}
-          id={chat.id}
-          initialChatModel={DEFAULT_CHAT_MODEL}
-          initialMessages={uiMessages}
-          initialVisibilityType={chat.visibility}
-          isReadonly={session?.user?.id !== chat.userId}
-        />
-        <DataStreamHandler />
-      </>
-    );
-  }
+  // Use chat-specific model if set, otherwise use cookie, otherwise use default
+  const chatModel = chat.model || (chatModelFromCookie?.value) || DEFAULT_CHAT_MODEL;
+
+  const chatSettings: Partial<ChatSettings> = {
+    model: chat.model || undefined,
+    systemInstruction: chat.systemInstruction || undefined,
+    temperature: chat.temperature || undefined,
+  };
 
   return (
     <>
       <Chat
         autoResume={true}
         id={chat.id}
-        initialChatModel={chatModelFromCookie.value}
+        initialChatModel={chatModel}
         initialMessages={uiMessages}
         initialVisibilityType={chat.visibility}
         isReadonly={session?.user?.id !== chat.userId}
+        initialSettings={chatSettings}
       />
       <DataStreamHandler />
     </>

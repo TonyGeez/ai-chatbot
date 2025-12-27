@@ -9,6 +9,8 @@ import {
   timestamp,
   uuid,
   varchar,
+  unique,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("User", {
@@ -29,6 +31,9 @@ export const chat = pgTable("Chat", {
   visibility: varchar("visibility", { enum: ["public", "private"] })
     .notNull()
     .default("private"),
+  model: text("model"),
+  systemInstruction: text("systemInstruction"),
+  temperature: text("temperature"),
 });
 
 export type Chat = InferSelectModel<typeof chat>;
@@ -168,3 +173,27 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
+
+export const providerEnum = pgEnum("provider_enum", [
+  "openrouter",
+  "deepinfra",
+]);
+
+export const providerConfig = pgTable(
+  "ProviderConfig",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    createdAt: timestamp("createdAt").notNull(),
+    updatedAt: timestamp("updatedAt").notNull(),
+    userId: uuid("userId")
+      .notNull()
+      .references(() => user.id),
+    provider: providerEnum("provider").notNull(),
+    apiKey: text("apiKey").notNull(),
+  },
+  (table) => ({
+    userProviderUnique: unique().on(table.userId, table.provider),
+  })
+);
+
+export type ProviderConfig = InferSelectModel<typeof providerConfig>;

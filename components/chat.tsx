@@ -39,6 +39,7 @@ export function Chat({
   initialVisibilityType,
   isReadonly,
   autoResume,
+  initialSettings,
 }: {
   id: string;
   initialMessages: ChatMessage[];
@@ -46,6 +47,7 @@ export function Chat({
   initialVisibilityType: VisibilityType;
   isReadonly: boolean;
   autoResume: boolean;
+  initialSettings?: Partial<ChatSettings>;
 }) {
   const router = useRouter();
 
@@ -201,7 +203,8 @@ export function Chat({
         <ChatHeader
           chatId={id}
           isReadonly={isReadonly}
-          selectedVisibilityType={initialVisibilityType}
+          selectedVisibilityType={visibilityType}
+          initialSettings={initialSettings}
         />
 
         <Messages

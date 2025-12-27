@@ -7,7 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
-import { PlusIcon, TrashIcon } from "@/components/icons";
+import { PlusIcon, SettingsIcon, TrashIcon } from "@/components/icons";
 import {
   getChatHistoryPaginationKey,
   SidebarHistory,
@@ -37,12 +37,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { GlobalSettingsModal } from "./global-settings-modal";
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
   const { mutate } = useSWRConfig();
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
+  const [showGlobalSettings, setShowGlobalSettings] = useState(false);
 
   const handleDeleteAll = () => {
     const deletePromise = fetch("/api/history", { method: "DELETE" });
@@ -77,21 +79,39 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               </Link>
               <div className="flex flex-row gap-1">
                 {user && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        className="h-8 p-1.5 md:h-fit md:p-1.5"
-                        onClick={() => setShowDeleteAllDialog(true)}
-                        type="button"
-                        variant="ghost"
-                      >
-                        <TrashIcon />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent align="end" className="hidden md:block">
-                      Delete All Chats
-                    </TooltipContent>
-                  </Tooltip>
+                  <>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          className="h-8 p-1.5 md:h-fit md:p-1.5"
+                          onClick={() => setShowGlobalSettings(true)}
+                          type="button"
+                          variant="ghost"
+                          title="Global Settings"
+                        >
+                          <SettingsIcon />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent align="end" className="hidden md:block">
+                        Global Settings
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          className="h-8 p-1.5 md:h-fit md:p-1.5"
+                          onClick={() => setShowDeleteAllDialog(true)}
+                          type="button"
+                          variant="ghost"
+                        >
+                          <TrashIcon />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent align="end" className="hidden md:block">
+                        Delete All Chats
+                      </TooltipContent>
+                    </Tooltip>
+                  </>
                 )}
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -144,6 +164,11 @@ export function AppSidebar({ user }: { user: User | undefined }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <GlobalSettingsModal
+        open={showGlobalSettings}
+        onOpenChange={setShowGlobalSettings}
+      />
     </>
   );
 }

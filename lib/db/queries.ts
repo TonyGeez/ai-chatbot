@@ -30,8 +30,10 @@ import {
   type User,
   user,
   vote,
+  providerConfig,
 } from "./schema";
 import { generateHashedPassword } from "./utils";
+import type { ProviderType } from "@/lib/providers";
 
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth
@@ -239,6 +241,32 @@ export async function getChatById({ id }: { id: string }) {
     return selectedChat;
   } catch (_error) {
     throw new ChatSDKError("bad_request:database", "Failed to get chat by id");
+  }
+}
+
+export async function getChatWithSettings({ id }: { id: string }) {
+  try {
+    const [selectedChat] = await db
+      .select({
+        id: chat.id,
+        createdAt: chat.createdAt,
+        title: chat.title,
+        userId: chat.userId,
+        visibility: chat.visibility,
+        model: chat.model,
+        systemInstruction: chat.systemInstruction,
+        temperature: chat.temperature,
+      })
+      .from(chat)
+      .where(eq(chat.id, id));
+
+    if (!selectedChat) {
+      return null;
+    }
+
+    return selectedChat;
+  } catch (_error) {
+    throw new ChatSDKError("bad_request:database", "Failed to get chat by id with settings");
   }
 }
 
@@ -599,4 +627,37 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
       "Failed to get stream ids by chat id"
     );
   }
+}
+
+export async function saveProviderConfig(
+  userId: string,
+  provider: ProviderType,
+  apiKey: string
+) {
+  const now = new Date();
+
+  return await db
+    .insert(providerConfig)
+    .values({
+      id: generateUUID(),
+      createdAt: now,
+      updatedAt: now,
+      userId,
+      provider,
+      apiKey,
+    })
+    .onConflictDoUpdate({
+      target: [providerConfig.userId, providerConfig.provider],
+      set: {
+        apiKey,
+        updatedAt: now,
+      },
+    });
+}
+
+export async function getAllProviderConfigs(userId: string) {
+  return await db
+    .select()
+    .from(providerConfig)
+    .where(eq(providerConfig.userId, userId));
 }

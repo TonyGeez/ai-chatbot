@@ -7,6 +7,7 @@ import {
   stepCountIs,
   streamText,
 } from "ai";
+import { typedTextTransform } from "@/lib/ai/transform";
 import { after } from "next/server";
 import {
   createResumableStreamContext,
@@ -25,6 +26,7 @@ import {
   createStreamId,
   deleteChatById,
   getChatById,
+  getChatWithSettings,
   getMessageCountByUserId,
   getMessagesByChatId,
   saveChat,
@@ -97,9 +99,12 @@ export async function POST(request: Request) {
     // Check if this is a tool approval flow (all messages sent)
     const isToolApprovalFlow = Boolean(messages);
 
-    const chat = await getChatById({ id });
+    const chat = await getChatWithSettings({ id });
     let messagesFromDb: DBMessage[] = [];
     let titlePromise: Promise<string> | null = null;
+
+    // Determine which model to use: chat settings, then request body, then fall back
+    const effectiveModel = chat?.model || selectedChatModel;
 
     if (chat) {
       if (chat.userId !== session.user.id) {
@@ -172,9 +177,10 @@ export async function POST(request: Request) {
           selectedChatModel.includes("thinking");
 
         const result = streamText({
-          model: getLanguageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel, requestHints }),
+          model: getLanguageModel(effectiveModel),
+          system: chat?.systemInstruction || systemPrompt({ selectedChatModel: effectiveModel, requestHints }),
           messages: await convertToModelMessages(uiMessages),
+          temperature: chat?.temperature ? parseFloat(chat.temperature) : undefined,
           stopWhen: stepCountIs(5),
           experimental_activeTools: isReasoningModel
             ? []
@@ -186,7 +192,7 @@ export async function POST(request: Request) {
               ],
           experimental_transform: isReasoningModel
             ? undefined
-            : smoothStream({ chunking: "word" }),
+            : [smoothStream({ chunking: "word" }), typedTextTransform()],
           providerOptions: isReasoningModel
             ? {
                 anthropic: {
