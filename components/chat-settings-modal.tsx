@@ -81,31 +81,26 @@ export function ChatSettingsModal({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const payload = {
-        model,
-        systemInstruction,
-        temperature,
-        maxTokens: maxTokens || null,
-        topP: topP || null,
-        topK: topK || null,
-        presencePenalty: presencePenalty || null,
-        frequencyPenalty: frequencyPenalty || null,
-        seed: seed || null,
-      };
-      console.log("Sending settings payload:", payload);
-
       const response = await fetch(`/api/chat/${chatId}/settings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          model,
+          systemInstruction,
+          temperature,
+          maxTokens,
+          topP,
+          topK,
+          presencePenalty,
+          frequencyPenalty,
+          seed,
+        }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-        console.error("Server error:", errorData);
-        throw new Error(`Failed to save settings: ${errorData.error}`);
+        throw new Error("Failed to save settings");
       }
 
       toast.success("Chat settings saved successfully");

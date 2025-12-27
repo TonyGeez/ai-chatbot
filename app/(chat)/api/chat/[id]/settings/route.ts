@@ -45,14 +45,14 @@ export async function POST(
       .update(chat)
       .set({
         model,
-        systemInstruction: systemInstruction?.trim() || null,
-        temperature: temperature?.trim() || null,
-        maxTokens: maxTokens?.trim() || null,
-        topP: topP?.trim() || null,
-        topK: topK?.trim() || null,
-        presencePenalty: presencePenalty?.trim() || null,
-        frequencyPenalty: frequencyPenalty?.trim() || null,
-        seed: seed?.trim() || null,
+        systemInstruction: systemInstruction || null,
+        temperature: temperature || null,
+        maxTokens: maxTokens || null,
+        topP: topP || null,
+        topK: topK || null,
+        presencePenalty: presencePenalty || null,
+        frequencyPenalty: frequencyPenalty || null,
+        seed: seed || null,
       })
       .where(eq(chat.id, id));
 
