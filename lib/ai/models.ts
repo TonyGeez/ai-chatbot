@@ -1,5 +1,5 @@
 // Curated list of top models from Vercel AI Gateway
-export const DEFAULT_CHAT_MODEL = "google/gemini-2.5-flash-lite";
+export const DEFAULT_CHAT_MODEL = "kwaipilot/kat-coder-pro:free";
 
 export type ChatModel = {
   id: string;

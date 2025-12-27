@@ -67,7 +67,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
       <Sidebar className="bg-sidebar group-data-[side=left]:border-r-0">
         <SidebarHeader>
           <SidebarMenu>
-            <div className="flex flex-row items-center justify-between px-2 py-2">
+            <div className="flex-row items-center justify-between py-2">
               <Link
                 className="flex flex-row items-center gap-3"
                 href="/"
@@ -77,41 +77,25 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   Chatbot
                 </span>
               </Link>
-              <div className="flex flex-row gap-1">
+              <div className="flex flex-row justify-end gap-1">
                 {user && (
-                  <>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          className="h-8 p-1.5 md:h-fit md:p-1.5"
-                          onClick={() => setShowGlobalSettings(true)}
-                          type="button"
-                          variant="ghost"
-                          title="Global Settings"
-                        >
-                          <SettingsIcon />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent align="end" className="hidden md:block">
-                        Global Settings
-                      </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          className="h-8 p-1.5 md:h-fit md:p-1.5"
-                          onClick={() => setShowDeleteAllDialog(true)}
-                          type="button"
-                          variant="ghost"
-                        >
-                          <TrashIcon />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent align="end" className="hidden md:block">
-                        Delete All Chats
-                      </TooltipContent>
-                    </Tooltip>
-                  </>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        className="h-8 p-1.5 md:h-fit md:p-1.5"
+                        onClick={() => setShowGlobalSettings(true)}
+                        title="Global Settings"
+                        type="button"
+                        variant="ghost"
+                      >
+                        <SettingsIcon />
+                        <span className="text-xs">Settings</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent align="end" className="hidden md:block">
+                      Global Settings
+                    </TooltipContent>
+                  </Tooltip>
                 )}
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -125,7 +109,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                       type="button"
                       variant="ghost"
                     >
-                      <PlusIcon />
+                      <PlusIcon /> <span className="text-xs">New</span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent align="end" className="hidden md:block">
@@ -166,8 +150,8 @@ export function AppSidebar({ user }: { user: User | undefined }) {
       </AlertDialog>
 
       <GlobalSettingsModal
-        open={showGlobalSettings}
         onOpenChange={setShowGlobalSettings}
+        open={showGlobalSettings}
       />
     </>
   );

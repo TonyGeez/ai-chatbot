@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -19,12 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
 import type { ChatModel } from "@/lib/ai/models";
 import { chatModels, modelsByProvider } from "@/lib/ai/models";
 
-export interface ChatSettings {
+export type ChatSettings = {
   model: string;
   systemInstruction: string;
   temperature: string;
@@ -34,14 +35,14 @@ export interface ChatSettings {
   presencePenalty?: string;
   frequencyPenalty?: string;
   seed?: string;
-}
+};
 
-interface ChatSettingsModalProps {
+type ChatSettingsModalProps = {
   chatId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentSettings?: Partial<ChatSettings>;
-}
+};
 
 export function ChatSettingsModal({
   chatId,
@@ -49,18 +50,26 @@ export function ChatSettingsModal({
   onOpenChange,
   currentSettings,
 }: ChatSettingsModalProps) {
-  const [model, setModel] = useState<string>(currentSettings?.model || chatModels[0].id);
+  const [model, setModel] = useState<string>(
+    currentSettings?.model || chatModels[0].id
+  );
   const [systemInstruction, setSystemInstruction] = useState<string>(
     currentSettings?.systemInstruction || ""
   );
   const [temperature, setTemperature] = useState<string>(
     currentSettings?.temperature || "0.7"
   );
-  const [maxTokens, setMaxTokens] = useState<string>(currentSettings?.maxTokens || "");
+  const [maxTokens, setMaxTokens] = useState<string>(
+    currentSettings?.maxTokens || ""
+  );
   const [topP, setTopP] = useState<string>(currentSettings?.topP || "");
   const [topK, setTopK] = useState<string>(currentSettings?.topK || "");
-  const [presencePenalty, setPresencePenalty] = useState<string>(currentSettings?.presencePenalty || "");
-  const [frequencyPenalty, setFrequencyPenalty] = useState<string>(currentSettings?.frequencyPenalty || "");
+  const [presencePenalty, setPresencePenalty] = useState<string>(
+    currentSettings?.presencePenalty || ""
+  );
+  const [frequencyPenalty, setFrequencyPenalty] = useState<string>(
+    currentSettings?.frequencyPenalty || ""
+  );
   const [seed, setSeed] = useState<string>(currentSettings?.seed || "");
   const [isSaving, setIsSaving] = useState(false);
 
@@ -116,33 +125,33 @@ export function ChatSettingsModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
-        <DialogHeader>
+    <Dialog onOpenChange={onOpenChange} open={open}>
+      <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden p-0 sm:max-w-2xl">
+        <DialogHeader className="px-6 pt-6">
           <DialogTitle>Chat Settings</DialogTitle>
           <DialogDescription>
             Configure model and parameters for this chat
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-6 py-4">
+        <div className="grid flex-1 gap-6 overflow-y-auto px-6 py-4">
           <div className="grid gap-2">
             <Label htmlFor="model">Model</Label>
-            <Select value={model} onValueChange={setModel}>
+            <Select onValueChange={setModel} value={model}>
               <SelectTrigger id="model">
                 <SelectValue placeholder="Select a model" />
               </SelectTrigger>
               <SelectContent className="max-h-[400px]">
                 {Object.entries(modelsByProvider).map(([provider, models]) => (
                   <div key={provider}>
-                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                    <div className="px-2 py-1.5 font-semibold text-muted-foreground text-xs">
                       {provider.charAt(0).toUpperCase() + provider.slice(1)}
                     </div>
                     {models.map((m: ChatModel) => (
                       <SelectItem key={m.id} value={m.id}>
                         <div className="flex flex-col">
                           <span>{m.name}</span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-muted-foreground text-xs">
                             {m.description}
                           </span>
                         </div>
@@ -158,132 +167,120 @@ export function ChatSettingsModal({
             <Label htmlFor="system-instruction">System Instruction</Label>
             <Textarea
               id="system-instruction"
-              placeholder="Enter system instructions (optional)..."
-              value={systemInstruction}
               onChange={(e) => setSystemInstruction(e.target.value)}
+              placeholder="Enter system instructions (optional)..."
               rows={6}
+              value={systemInstruction}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Custom instructions that guide the AI's behavior for this chat
             </p>
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="temperature">Temperature</Label>
-            <Select value={temperature} onValueChange={setTemperature}>
-              <SelectTrigger id="temperature">
-                <SelectValue placeholder="Select temperature" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0.1">0.1 - Very focused and deterministic</SelectItem>
-                <SelectItem value="0.3">0.3 - More focused and consistent</SelectItem>
-                <SelectItem value="0.5">0.5 - Balanced</SelectItem>
-                <SelectItem value="0.7">0.7 - Creative and varied (default)</SelectItem>
-                <SelectItem value="0.9">0.9 - Very creative and diverse</SelectItem>
-                <SelectItem value="1.0">1.0 - Maximum creativity</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              Controls randomness: Lower is more focused, higher is more creative
-            </p>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="max-tokens">Max Tokens</Label>
-            <Input
-              id="max-tokens"
-              type="number"
-              placeholder="Optional - max tokens to generate"
-              value={maxTokens}
-              onChange={(e) => setMaxTokens(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Maximum number of tokens to generate (optional)
-            </p>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="top-p">Top P</Label>
-            <Input
-              id="top-p"
-              type="number"
-              step="0.01"
-              min="0"
-              max="1"
-              placeholder="0.0 - 1.0 (optional)"
-              value={topP}
-              onChange={(e) => setTopP(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Nucleus sampling: 0.1 = only top 10% probability mass (optional)
-            </p>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="top-k">Top K</Label>
-            <Input
-              id="top-k"
-              type="number"
-              min="1"
-              placeholder="Optional"
-              value={topK}
-              onChange={(e) => setTopK(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Only sample from top K options (removes low probability responses)
-            </p>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="presence-penalty">Presence Penalty</Label>
-            <Input
-              id="presence-penalty"
-              type="number"
-              step="0.1"
-              placeholder="-2.0 to 2.0 (optional)"
-              value={presencePenalty}
-              onChange={(e) => setPresencePenalty(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Positive values penalize new tokens based on whether they appear in the text so far
-            </p>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="frequency-penalty">Frequency Penalty</Label>
-            <Input
-              id="frequency-penalty"
-              type="number"
-              step="0.1"
-              placeholder="-2.0 to 2.0 (optional)"
-              value={frequencyPenalty}
-              onChange={(e) => setFrequencyPenalty(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Positive values penalize new tokens based on their frequency in the text so far
-            </p>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="seed">Seed</Label>
-            <Input
-              id="seed"
-              type="number"
-              placeholder="Optional - for deterministic results"
-              value={seed}
-              onChange={(e) => setSeed(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Set a seed for reproducible/deterministic results
-            </p>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid gap-2">
+              <Label htmlFor="max-tokens">Max Tokens</Label>
+              <Input
+                id="max-tokens"
+                onChange={(e) => setMaxTokens(e.target.value)}
+                placeholder="Optional"
+                type="number"
+                value={maxTokens}
+              />
+              <p className="text-muted-foreground text-xs">
+                Maximum tokens to generate
+              </p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="top-k">Top K</Label>
+              <Input
+                id="top-k"
+                min="1"
+                onChange={(e) => setTopK(e.target.value)}
+                placeholder="Optional"
+                type="number"
+                value={topK}
+              />
+              <p className="text-muted-foreground text-xs">
+                Sample from top K options
+              </p>
+            </div>{" "}
+            <div className="grid gap-2">
+              <Label htmlFor="top-p">Top P: {topP || "Not set"}</Label>
+              <Slider
+                className="w-full"
+                id="top-p"
+                max={1}
+                min={0}
+                onValueChange={(value) => setTopP(value[0].toString())}
+                step={0.01}
+                value={[Number.parseFloat(topP || "0")]}
+              />
+              <p className="text-muted-foreground text-xs">
+                Nucleus sampling parameter
+              </p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="temperature">Temperature: {temperature}</Label>
+              <Slider
+                className="w-full"
+                id="temperature"
+                max={1}
+                min={0}
+                onValueChange={(value) => setTemperature(value[0].toString())}
+                step={0.1}
+                value={[Number.parseFloat(temperature)]}
+              />
+              <p className="text-muted-foreground text-xs">
+                Lower is focused, higher is creative
+              </p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="presence-penalty">
+                Presence Penalty: {presencePenalty || "Not set"}
+              </Label>
+              <Slider
+                className="w-full"
+                id="presence-penalty"
+                max={2}
+                min={-2}
+                onValueChange={(value) =>
+                  setPresencePenalty(value[0].toString())
+                }
+                step={0.1}
+                value={[Number.parseFloat(presencePenalty || "0")]}
+              />
+              <p className="text-muted-foreground text-xs">
+                Penalize repeated topics
+              </p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="frequency-penalty">
+                Frequency Penalty: {frequencyPenalty || "Not set"}
+              </Label>
+              <Slider
+                className="w-full"
+                id="frequency-penalty"
+                max={2}
+                min={-2}
+                onValueChange={(value) =>
+                  setFrequencyPenalty(value[0].toString())
+                }
+                step={0.1}
+                value={[Number.parseFloat(frequencyPenalty || "0")]}
+              />
+              <p className="text-muted-foreground text-xs">
+                Penalize token frequency
+              </p>
+            </div>
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="border-t px-6 pt-4 pb-6">
+          <Button onClick={() => onOpenChange(false)} variant="outline">
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
+          <Button disabled={isSaving} onClick={handleSave}>
             {isSaving ? "Saving..." : "Save Settings"}
           </Button>
         </DialogFooter>

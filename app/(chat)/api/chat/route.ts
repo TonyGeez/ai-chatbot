@@ -7,7 +7,6 @@ import {
   stepCountIs,
   streamText,
 } from "ai";
-import { typedTextTransform } from "@/lib/ai/transform";
 import { after } from "next/server";
 import {
   createResumableStreamContext,
@@ -21,6 +20,7 @@ import { createDocument } from "@/lib/ai/tools/create-document";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { updateDocument } from "@/lib/ai/tools/update-document";
+import { typedTextTransform } from "@/lib/ai/transform";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
   createStreamId,
@@ -124,7 +124,10 @@ export async function POST(request: Request) {
       });
 
       // Start title generation in parallel (don't await)
-      titlePromise = generateTitleFromUserMessage({ message, userId: session.user.id });
+      titlePromise = generateTitleFromUserMessage({
+        message,
+        userId: session.user.id,
+      });
     }
 
     // Use all messages for tool approval, otherwise DB messages + new message
@@ -178,15 +181,25 @@ export async function POST(request: Request) {
 
         const result = streamText({
           model: await getLanguageModel(effectiveModel, session.user.id),
-          system: chat?.systemInstruction || systemPrompt({ selectedChatModel: effectiveModel, requestHints }),
+          system:
+            chat?.systemInstruction ||
+            systemPrompt({ selectedChatModel: effectiveModel, requestHints }),
           messages: await convertToModelMessages(uiMessages),
-          temperature: chat?.temperature ? parseFloat(chat.temperature) : undefined,
-          maxTokens: chat?.maxTokens ? parseInt(chat.maxTokens) : undefined,
-          topP: chat?.topP ? parseFloat(chat.topP) : undefined,
-          topK: chat?.topK ? parseInt(chat.topK) : undefined,
-          presencePenalty: chat?.presencePenalty ? parseFloat(chat.presencePenalty) : undefined,
-          frequencyPenalty: chat?.frequencyPenalty ? parseFloat(chat.frequencyPenalty) : undefined,
-          seed: chat?.seed ? parseInt(chat.seed) : undefined,
+          temperature: chat?.temperature
+            ? Number.parseFloat(chat.temperature)
+            : undefined,
+          maxTokens: chat?.maxTokens
+            ? Number.parseInt(chat.maxTokens)
+            : undefined,
+          topP: chat?.topP ? Number.parseFloat(chat.topP) : undefined,
+          topK: chat?.topK ? Number.parseInt(chat.topK, 10) : undefined,
+          presencePenalty: chat?.presencePenalty
+            ? Number.parseFloat(chat.presencePenalty)
+            : undefined,
+          frequencyPenalty: chat?.frequencyPenalty
+            ? Number.parseFloat(chat.frequencyPenalty)
+            : undefined,
+          seed: chat?.seed ? Number.parseInt(chat.seed) : undefined,
           stopWhen: stepCountIs(5),
           experimental_activeTools: isReasoningModel
             ? []

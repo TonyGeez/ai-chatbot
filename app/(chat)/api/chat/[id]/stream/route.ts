@@ -1,4 +1,8 @@
-import { createUIMessageStream, JsonToSseTransformStream } from "ai";
+import {
+  createUIMessageStream,
+  JsonToSseTransformStream,
+  streamText,
+} from "ai";
 import { differenceInSeconds } from "date-fns";
 import { auth } from "@/app/(auth)/auth";
 import {
