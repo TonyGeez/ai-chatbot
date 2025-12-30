@@ -2,15 +2,17 @@ import type { InferSelectModel } from "drizzle-orm";
 import {
   boolean,
   foreignKey,
+  integer,
   json,
+  pgEnum,
   pgTable,
   primaryKey,
+  real,
   text,
   timestamp,
+  unique,
   uuid,
   varchar,
-  unique,
-  pgEnum,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("User", {
@@ -31,15 +33,14 @@ export const chat = pgTable("Chat", {
   visibility: varchar("visibility", { enum: ["public", "private"] })
     .notNull()
     .default("private"),
-  model: text("model"),
-  systemInstruction: text("systemInstruction"),
-  temperature: text("temperature"),
-  maxTokens: text("maxTokens"),
-  topP: text("topP"),
-  topK: text("topK"),
-  presencePenalty: text("presencePenalty"),
-  frequencyPenalty: text("frequencyPenalty"),
-  seed: text("seed"),
+  model: text("model").default("kwaipilot/kat-coder-pro:free"),
+  systemInstruction: text("systemInstruction").default(""),
+  temperature: real("temperature").default(0.7),
+  maxTokens: integer("maxTokens").default(3000),
+  topP: real("topP").default(0.9),
+  topK: integer("topK").default(50),
+  presencePenalty: real("presencePenalty").default(1.0),
+  frequencyPenalty: real("frequencyPenalty").default(1.0),
 });
 
 export type Chat = InferSelectModel<typeof chat>;

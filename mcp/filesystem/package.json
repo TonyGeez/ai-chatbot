@@ -1,0 +1,37 @@
+{
+  "name": "filesystem",
+  "version": "1.0.0",
+  "description": "Advanced filesystem search MCP server with ripgrep, fzf, and git integration",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "advanced-search-mcp": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "build": "echo 'No build step required'",
+    "test": "echo 'No tests yet'"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "ignore": "^7.0.5",
+    "zod": "^3.22.0"
+  },
+  "keywords": [
+    "mcp",
+    "search",
+    "ripgrep",
+    "filesystem",
+    "fzf",
+    "git"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "index.js",
+    "README.md"
+  ]
+}

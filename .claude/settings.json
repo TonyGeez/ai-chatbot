@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash",
+      "BashOutput",
+      "AskUserQuestion",
+      "TodoWrite",
+      "Task",
+      "Skill",
+      "KillShell",
+      "mcp__filesystem",
+      "mcp__memory",
+      "Glob",
+      "Grep",
+      "Skill"
+    ],
+    "deny": ["Edit", "Read", "Write", "NotebookEdit"],
+    "ask": ["ExitPlanMode", "SlashCommand", "WebFetch", "WebSearch"]
+  },
+  "env": {
+    "DISABLE_AUTOUPDATER": "1",
+    "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1",
+    "USE_BUILTIN_RIPGREP": "0"
+  },
+  "enableAllProjectMcpServers": true,
+  "alwaysThinkingEnabled": false
+}
